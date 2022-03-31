@@ -1,5 +1,5 @@
 # fs-compaction-util
-#### Introduction
+## Introduction
 The compaction utility is a python script that takes in a feature group name and compacts the offline store for that feature group. This script is run as a SageMaker processing job, in this case a PySpark processor.
 
 There are 3 modes that the compaction supports:
@@ -15,7 +15,7 @@ The featurestore_offline_compact_util.compact_feature_group takes in these param
 * **partition_mode - Optional**: Valid values are 'hour' and 'day', default is 'hour'. This specifies if the files need to be compacted for an hour, or compacted for the entire day into a single file.
 
 There are two options to run this utility:
-##### 1. Serverless utility
+### 1. Serverless utility
 This is a serverless architecture leveraging EventBridge to fire an event on a scheduled basis, Step functions to manage and track different states, lambda functions to create and run SageMaker processing job which compacts the files.
 The EventBridge is used to schedule the compaction, the first time run can be in full mode and from then can be scheduled to run in an incremental mode. The target for the EventBridge is a Step function workflow.
 
@@ -33,7 +33,7 @@ Key things to note:
 
 The **sm-featurestore-compact-util-cf.yml** is a CloudFormation template that creates the above resources and the IAM roles for the resources.
 
-###### Deployment guide:
+#### Deployment guide:
 The CloudFormation (CFN) template creates 2 Lambda functions, a Step function, an Event bridge rule and IAM roles necessary for each service to invoke the next service.
 
 Follow these steps to deploy the stack:
@@ -70,7 +70,7 @@ Follow these steps to deploy the stack:
     * SPARK_CONTAINER_IMAGE - Container image that the SageMaker Processing job should use. The location is configured in the Cloudformation template based on the region that the stack gets created in.
 
 
-###### How to use the utility:
+#### How to use the utility:
 The Cloudformation creates an event bridge rule disabled by default and with a default schedule to run every 24 hours. The target for the rule is the step function.
 The util can be scheduled in two modes via EventBridge
 
@@ -127,13 +127,13 @@ The util can be scheduled in two modes via EventBridge
 }
 ```
 
-###### Monitoring:
+#### Monitoring:
 * Lambda and SageMaker processing jobs will create logs in Cloudwatch.
 * Step functions can be monitored to check if all steps executed without errors. Navigate to Step Functions via AWS Console → StateMachines → Click on sm-featurestore-offline-compact → Click on the latest execution. A graph should be displayed to show the status of the execution. Each step in the graph shows details of input, output, execution success/failure and errors if any.
 
 ![Monitoring](images/step-functions.png)
 
-###### Validation:
+#### Validation:
 
 * Check the S3 compact URI location for the compacted files. They will be partitioned by year, month day (and hour if partition_mode is hour). If compact_uri was not specified as an input, the files will be in the same bucket as the offline store. The S3 location will be in the below format
 ```
@@ -143,10 +143,10 @@ The util can be scheduled in two modes via EventBridge
 
 
 
-##### 2. Notebook utility
+### 2. Notebook utility
 This is a Jupyter notebook that calls a python function that inturn creates and runs a SageMaker processing job, giving it the pyspark script that has logic for data compaction. The pyspark script sm-processing-script/sm-featurestore_offline_compact_spark.py and the files in notebook-util folder should be uploaded to SageMaker Jupyter Notebook instance.
 
-###### How to use the utility:
+#### How to use the utility:
 Execute the cell in the notebook to invoke the util. Change the input parameters as needed.  
 ```
     featurestore_offline_compact_util.compact_feature_group('feature-group-name', 'full', '', '', '', '','')
